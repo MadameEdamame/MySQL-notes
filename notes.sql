@@ -409,5 +409,70 @@ JOIN reviews
 JOIN reviewers 
 	ON reviewers.id = reviews.reviewer_id 
 ORDER BY series.id;
+		     
+		      
+		      
+/* ======================== Database Triggers ========================= */
+
+CREATE TRIGGER trigger_name
+	trigger_time trigger_event ON table_name FOR EACH ROW
+	BEGIN
+		...
+	ENG;
+	/* 	trigger_time: AFTER, BEFORE
+		trigger_event: INSERT, UPDATE, DELETE */
+
+
+
+/* limiting only adult */
+DELIMITER $$ /* now delimiter as $$ */
+
+CREATE TRIGGER must_be_adult
+	BEFORE INSERT ON users FOR EACH ROW
+	BEGIN
+		IF NEW.age < 18
+		THEN
+			SIGNAL SQLSTATE '45000'
+				SET MESSAGE_TEXT = 'Must be an adult!';
+		END IF;
+	END;
+
+$$
+
+DELIMITER ;
+
+
+/* logging unfollows */
+DELIMITER $$
+
+CREATE TRIGGER create_unfollow
+    AFTER DELETE ON follows FOR EACH ROW 
+BEGIN
+    INSERT INTO unfollows
+    SET follower_id = OLD.follower_id,
+        followee_id = OLD.followee_id;
+	/* or INSERT INTO unfollows(follower_id, followee_id) VALUES(OLD.follower_id, OLD.followee.id); */
+END$$
+
+DELIMITER ;
+
+
+
+/* Trigger Commands */
+source directory/trigger-name;
+
+SHOW TRIGGERS; /* show all triggers */
+
+DROP TRIGGER trigger_name;
+
+
+
+
+
+
+
+
+
+
 
 
